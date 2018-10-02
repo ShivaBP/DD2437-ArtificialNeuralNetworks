@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import random
 import math
+import matplotlib.patches as mpatches
 
 stepSize = 0.2
 numEpochs = 21
@@ -10,7 +11,26 @@ numEpochs = 21
 def readAllVotes():
     inputs = np.loadtxt('votes.dat', delimiter= ',' , dtype=float)
     inputs = inputs.reshape(349, 31)
-    print(inputs)
+    return inputs
+
+def readDistricts():
+    inputs = np.loadtxt('mpdistrict.dat' , dtype=int)
+    inputs = inputs.reshape(349 , 1)
+    return inputs
+
+def readGenders():
+    inputs = np.loadtxt('mpsex.dat' , dtype=int)
+    inputs = inputs.reshape(349 , 1)
+    return inputs
+
+def readParties():
+    inputs = np.loadtxt('mpparty.dat' , dtype=int)
+    inputs = inputs.reshape(349 , 1)
+    return inputs
+
+def readNmaes():
+    inputs = np.loadtxt('mpnames.txt' , dtype=str)
+    inputs = inputs.reshape(349 , 1)
     return inputs
 
 def votesPerMp(allVotes , MPIndex):
@@ -20,9 +40,9 @@ def votesPerMp(allVotes , MPIndex):
     return votes
 
 def initGrid():
-    grid = np.zeros((10 , 10))
-    for row in range(len(grid)):
-        for col in range(len(grid[0])):
+    grid = np.zeros(((10,10,31)))
+    for row in range(10):
+        for col in range(10):
             value = np.random.rand(1,31)
             grid[row][col] = value
     return grid
@@ -32,7 +52,7 @@ def closestWeigthRow(grid,  votes):
     closestNodePos = np.zeros(2)
     for row in range(10):
         for col in range(10):
-            distance = math.sqrt(np.dot( (votes-grid[row][col]).T, votes-grid[row][col] ))
+            distance = np.dot( (votes-grid[row][col]).T, votes-grid[row][col] )
             if ( distance < minDistance):
                 minDistance = distance
                 closestNodePos[0] = row
@@ -49,22 +69,24 @@ def weightUpdate(votes , grid  , winnerPos , radius):
     if(minLimitCol < 0):
         minLimitCol = 0
     maxLimitRow= winnerPos[0] + radius
-    if(maxLimitRow > 9):
-        minLimitRow = 9
+    if(maxLimitRow >9):
+        maxLimitRow = 9
     maxLimitCol= winnerPos[1] + radius
-    if(minLimitCol > 9):
+    if(maxLimitCol > 9):
         maxLimitCol = 9
-    for row in range (minLimitRow  , maxLimitRow):
-        for col in range(minLimitCol , maxLimitCol):
+    for row in range (int (minLimitRow)  , int(maxLimitRow)):
+        for col in range(int (minLimitCol) , int (maxLimitCol)):          
             stepValue = stepSize * np.subtract(votes , grid[row][col])
-            updatedWeights[row][col] = np.add(updatedWeights[row][col] , stepValue)
+            updatedWeights[row][col] = np.add(grid[row][col] , stepValue)
     return updatedWeights
 
 def run():
-    initRadius= 5
+    initRadius= 10
     allVotes = readAllVotes()
+    parties = readParties()
     numVotes = 31
     numMembers = 349
+    results = np.zeros(numMembers)
     grid = initGrid()
     for epoch in range(numEpochs):
         radius = round ((initRadius - (epoch * initRadius/ (numEpochs-1)))/2 )
@@ -72,6 +94,10 @@ def run():
             votes = votesPerMp(allVotes , MPIndex)
             closestNode = closestWeigthRow(grid , votes )
             grid = weightUpdate(votes , grid , closestNode ,radius)
-            closestNode = closestWeigthRow(weights, coordinates)
+            closestNode = closestWeigthRow(grid, votes)
+            results[MPIndex] = closestNode[0] *10 + closestNode[1]
+    print(results)
 
 
+
+run()

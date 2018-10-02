@@ -9,7 +9,7 @@ lowerBound = 0
 upperBound = 7
 stepSize = 0.1
 inputSize = (int)((upperBound-lowerBound)/stepSize)
-numberOfClassifiers = 40
+numberOfClassifiers = 30
 etha = 0.2
 
 def generateData ():
@@ -72,8 +72,8 @@ def error(inputs , approximations):
 def updateClassifiers( codebook, error):
     delta = np.zeros((numberOfClassifiers , 2))
     for row in range(numberOfClassifiers):
-        delta[row][0] = codebook[row][0] - (etha * error * codebook[row][0])
-        delta[row][1] = codebook[row ][1] - (etha * error * codebook[row][1])
+        delta[row][0] = codebook[row][0] + (etha * error )
+        delta[row][1] = codebook[row ][1] + (etha * error )
     return delta
 
 def run():
