@@ -13,11 +13,6 @@ def readAllVotes():
     inputs = inputs.reshape(349, 31)
     return inputs
 
-def readDistricts():
-    inputs = np.loadtxt('mpdistrict.dat' , dtype=int)
-    inputs = inputs.reshape(349 , 1)
-    return inputs
-
 def readGenders():
     inputs = np.loadtxt('mpsex.dat' , dtype=int)
     inputs = inputs.reshape(349 , 1)
@@ -25,11 +20,6 @@ def readGenders():
 
 def readParties():
     inputs = np.loadtxt('mpparty.dat' , dtype=int)
-    inputs = inputs.reshape(349 , 1)
-    return inputs
-
-def readNmaes():
-    inputs = np.loadtxt('mpnames.txt' , dtype=str)
     inputs = inputs.reshape(349 , 1)
     return inputs
 
@@ -80,24 +70,75 @@ def weightUpdate(votes , grid  , winnerPos , radius):
             updatedWeights[row][col] = np.add(grid[row][col] , stepValue)
     return updatedWeights
 
-def run():
-    initRadius= 10
-    allVotes = readAllVotes()
+def plotParties(resultVector) :
     parties = readParties()
+    for memberIndex in range(349):
+        x = resultVector[memberIndex][0] + 1
+        y = resultVector[memberIndex][1] + 1
+        if parties[memberIndex] == 1:
+            plt.plot([x], [y], 'bo')
+        elif parties[memberIndex] == 2:
+            plt.plot([x], [y], 'co')
+        elif parties[memberIndex] == 3:
+            plt.plot([x], [y], 'ko')
+        elif parties[memberIndex] == 4:
+            plt.plot([x], [y], 'ro')
+        elif parties[memberIndex] == 5:
+            plt.plot([x], [y], 'go')
+        elif parties[memberIndex] == 6:
+            plt.plot([x], [y], 'yo')
+        elif parties[memberIndex] == 7:
+            plt.plot([x], [y], 'mo')
+        elif parties[memberIndex] == 0:
+            plt.plot([x] , [y], 'wo')
+    plt.grid()
+    plt.axis([0, 15, 0, 15])
+    m = mpatches.Patch(color='blue', label='Moderaterna')
+    fp = mpatches.Patch(color='cyan', label='Liberalerna')
+    s = mpatches.Patch(color='black', label='Socialdemokraterna')
+    v = mpatches.Patch(color='red', label='Vänsterpartiet')
+    mp = mpatches.Patch(color='green', label='Miljöpartiet')
+    kd = mpatches.Patch(color='yellow', label='Kristdemokraterna')
+    c = mpatches.Patch(color='magenta', label='Centerpartiet')
+    noP = mpatches.Patch(color='white', label='No party')
+    plt.axis('on')
+    plt.legend(handles=[m, fp, s, v, mp, kd, c, noP],bbox_to_anchor=(1 , 1), loc=1, borderaxespad=0.)    
+    return plt.show()
+
+def plotGenders(resultVector) :
+    genders = readGenders()
+    for memberIndex in range(349):
+        x = resultVector[memberIndex][0] + 1
+        y = resultVector[memberIndex][1] + 1
+        if genders[memberIndex] == 0:
+            plt.plot([x], [y], 'bo')
+        elif genders[memberIndex] == 1:
+            plt.plot([x], [y], 'mo')
+    plt.grid()
+    plt.axis([0, 15, 0, 15])
+    m = mpatches.Patch(color='blue', label='Male')
+    f = mpatches.Patch(color='magenta', label='Female')
+    plt.axis('on')
+    plt.legend(handles=[m, f],bbox_to_anchor=(1 , 1), loc=1, borderaxespad=0.)    
+    return plt.show()     
+
+def run():
+    initRadius= 8
+    allVotes = readAllVotes() 
     numVotes = 31
     numMembers = 349
-    results = np.zeros(numMembers)
+    results = np.zeros((numMembers, 2))
     grid = initGrid()
     for epoch in range(numEpochs):
-        radius = round ((initRadius - (epoch * initRadius/ (numEpochs-1)))/2 )
+        radius = round (initRadius - (0.4 * epoch))
         for MPIndex in range(numMembers):
             votes = votesPerMp(allVotes , MPIndex)
             closestNode = closestWeigthRow(grid , votes )
             grid = weightUpdate(votes , grid , closestNode ,radius)
             closestNode = closestWeigthRow(grid, votes)
-            results[MPIndex] = closestNode[0] *10 + closestNode[1]
-    print(results)
-
-
+            results[MPIndex][0] = closestNode[0] 
+            results[MPIndex][1] = closestNode[1] 
+    plotParties(results)
+    plotGenders(results)
 
 run()
