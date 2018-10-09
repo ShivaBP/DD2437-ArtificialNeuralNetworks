@@ -82,11 +82,6 @@ def outputWeightUpdate( hiddenResults , outputUpdate):
     update = eta * dotProduct
     return update
 
-def plotData (inputs, targets, outputs):
-    plt.plot([p for p in inputs], [p for p in targets], 'b.')
-    plt.plot([p for p in inputs], [p for p in outputs], 'r.')
-    return plt.show()
-
 def run():
     inputs = generateData()
     targets = generateTargets(inputs)
@@ -107,5 +102,5 @@ def run():
         targetWeightUpdate = outputWeightUpdate(hiddenLayerResults , outputUpdate )
         outputWeights = np.add ( outputWeights  ,  targetWeightUpdate)
         outputs = forwardPassOutputLayer(hiddenLayerResults , outputWeights)
-    plotData(inputs, targets , outputs)
+    print(outputs)
 run()
